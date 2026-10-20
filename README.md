@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/logo.svg" width="72" height="72" alt=""></p>
+
 <h1 align="center">anfra-user</h1>
 
 <p align="center"><b>Everyone sees only their own data.</b><br>
