@@ -6,7 +6,7 @@
   <title>anfra-user</title>
   <link rel="icon" type="image/svg+xml" href="logo.svg">
   <meta name="theme-color" content="#7c4dce">
-  <meta name="description" content="Sign-in and per-user data access for Anfra repos, set up by your AI agent.">
+  <meta name="description" content="Serving the right data: row-based access for Anfra repos, set up by your AI agent.">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5.2.5/index.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/jetbrains-mono@5.2.5/index.css">
   <style>
@@ -63,6 +63,12 @@
     /* Hero */
     .hero { padding: 48px 0 40px; display: grid; gap: 40px; }
     @media (min-width: 900px) { .hero { grid-template-columns: 1.05fr 0.95fr; align-items: center; padding: 72px 0 56px; } }
+    .tagline { font-size: clamp(20px, 2.4vw, 24px); font-weight: 600; color: var(--ink-2); margin: -4px 0 16px; letter-spacing: -0.01em; }
+    .hero-art { margin: 0; justify-self: center; width: 100%; max-width: 440px; }
+    .hero-art img { display: block; width: 100%; height: auto; border-radius: 20px; transform: rotate(2deg);
+                    box-shadow: 0 30px 70px -30px rgba(192, 30, 90, 0.55), 0 0 0 1px var(--line); }
+    .chat-row { padding: 0 0 56px; }
+    .chat-row .prompt { max-width: 760px; margin: 0 auto; }
     .eyebrow { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 600; color: var(--violet-ink);
                background: var(--violet-wash); padding: 4px 12px; border-radius: 999px; }
     h1 { font-size: clamp(38px, 6vw, 60px); line-height: 1.04; letter-spacing: -0.035em; margin: 18px 0 18px; text-wrap: balance; }
@@ -155,23 +161,29 @@
     <div class="hero">
       <div>
         <span class="eyebrow">A demo add-on for Anfra · v0.1</span>
-        <h1>Everyone sees<br><em>only their own data.</em></h1>
+        <h1>Serving<br><em>the right data.</em></h1>
+        <p class="tagline">Row-based access for Anfra.</p>
         <p class="lede">anfra-user puts your Anfra repo behind sign-in. Each person sees only their own rows: their country, their vendor, their accounts.</p>
         <div class="cta">
           <a class="btn primary" href="#start">Give it to your agent</a>
           <a class="btn" href="#how">See how it works</a>
         </div>
       </div>
-      <div class="prompt" aria-label="Example conversation with an AI agent">
-        <div class="bar" aria-hidden="true"><i></i><i></i><i></i></div>
-        <div class="line"><span class="who dim">you</span><span class="you">Sales reps should log in and see only their own countries' orders.</span></div>
-        <hr>
-        <div class="line"><span class="who dim">agent</span><span class="ai">Scope sales by customers.country, from each user's country. No country: they see nothing.</span></div>
-        <div class="line"><span class="who dim"></span><span class="dim">wrote anfra-user.yml · 4 test users</span></div>
-        <div class="line"><span class="who dim">$</span><span>anfra-user verify</span></div>
-        <div class="line"><span class="who dim"></span><span class="ok">OK: 48 checks, 4 users, 12 queries.</span></div>
-        <div class="line"><span class="who dim"></span><span class="ai">Live at 127.0.0.1:8080. ana@ sees Brazil, ben@ sees USA + Canada.</span></div>
-      </div>
+      <figure class="hero-art">
+        <img src="serving.webp" width="868" height="812" alt="A server rack with eyelashes, glossy lips and long nails, captioned: this server is serving.">
+      </figure>
+    </div>
+    <div class="chat-row">
+    <div class="prompt" aria-label="Example conversation with an AI agent">
+      <div class="bar" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="line"><span class="who dim">you</span><span class="you">Sales reps should log in and see only their own countries' orders.</span></div>
+      <hr>
+      <div class="line"><span class="who dim">agent</span><span class="ai">Scope sales by customers.country, from each user's country. No country: they see nothing.</span></div>
+      <div class="line"><span class="who dim"></span><span class="dim">wrote anfra-user.yml · 4 test users</span></div>
+      <div class="line"><span class="who dim">$</span><span>anfra-user verify</span></div>
+      <div class="line"><span class="who dim"></span><span class="ok">OK: 48 checks, 4 users, 12 queries.</span></div>
+      <div class="line"><span class="who dim"></span><span class="ai">Live at 127.0.0.1:8080. ana@ sees Brazil, ben@ sees USA + Canada.</span></div>
+    </div>
     </div>
   </div>
 

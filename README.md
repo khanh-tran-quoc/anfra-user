@@ -2,9 +2,11 @@
 
 <h1 align="center">anfra-user</h1>
 
-<p align="center"><b>Everyone sees only their own data.</b><br>
-Sign-in and per-user data access for <a href="https://anfra.ai">Anfra</a> repos, set up by your AI agent.<br>
+<p align="center"><b>Serving the right data.</b><br>
+Row-based access for <a href="https://anfra.ai">Anfra</a> repos, set up by your AI agent.<br>
 <i>A demo built for fun.</i></p>
+
+<p align="center"><img src="docs/serving.webp" width="360" alt="A server rack with eyelashes, glossy lips and long nails, captioned: this server is serving."></p>
 
 <p align="center">
   <a href="https://khanh-tran-quoc.github.io/anfra-user/">Website</a> ·
