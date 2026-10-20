@@ -1,0 +1,27 @@
+{
+  "name": "anfra-user",
+  "version": "0.1.0",
+  "description": "Sign-in and per-user data scopes in front of an anfra repo. Demo-grade: see README.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "anfra-user": "./src/cli.ts"
+  },
+  "engines": {
+    "node": ">=23.6"
+  },
+  "scripts": {
+    "db": "docker compose up -d",
+    "start": "node src/cli.ts serve",
+    "check": "node src/cli.ts check",
+    "verify": "node src/cli.ts verify",
+    "test": "node --test test/*.test.ts"
+  },
+  "dependencies": {
+    "acorn": "^8.19.0",
+    "acorn-walk": "^8.3.5",
+    "bcryptjs": "^2.4.3",
+    "pg": "^8.13.1",
+    "yaml": "^2.6.1"
+  }
+}

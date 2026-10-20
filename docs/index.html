@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>anfra-user</title>
+  <meta name="description" content="Sign-in and per-user data access for Anfra repos, set up by your AI agent.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5.2.5/index.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/jetbrains-mono@5.2.5/index.css">
+  <style>
+    :root {
+      --bg: #f4f2ee; --surface: #ffffff; --sunken: #f8f7f4;
+      --ink: #1d1722; --ink-2: #4a4350; --ink-3: #6e6775;
+      --line: rgba(29, 23, 34, 0.12); --line-2: rgba(29, 23, 34, 0.2);
+      --violet: #7c4dce; --violet-ink: #5b2fb0; --violet-wash: #efe8fb;
+      --teal: #1f9aa6; --amber: #b9791b; --rose: #c0436a; --green: #2f855a;
+      --code-bg: #1d1722; --code-ink: #ece8f1; --code-dim: #9c94a6;
+      --radius: 14px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #16121a; --surface: #1f1a24; --sunken: #1a161e;
+        --ink: #f3f0f6; --ink-2: #c9c2d1; --ink-3: #9d95a6;
+        --line: rgba(255, 255, 255, 0.1); --line-2: rgba(255, 255, 255, 0.18);
+        --violet: #a98af0; --violet-ink: #c4adf6; --violet-wash: #2c2338;
+        --teal: #4cc3cf; --amber: #f0b252; --rose: #f07ea0; --green: #6cc496;
+        --code-bg: #0f0c12; --code-ink: #ece8f1; --code-dim: #8a8293;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #16121a; --surface: #1f1a24; --sunken: #1a161e;
+      --ink: #f3f0f6; --ink-2: #c9c2d1; --ink-3: #9d95a6;
+      --line: rgba(255, 255, 255, 0.1); --line-2: rgba(255, 255, 255, 0.18);
+      --violet: #a98af0; --violet-ink: #c4adf6; --violet-wash: #2c2338;
+      --teal: #4cc3cf; --amber: #f0b252; --rose: #f07ea0; --green: #6cc496;
+      --code-bg: #0f0c12; --code-ink: #ece8f1; --code-dim: #8a8293;
+    }
+
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font: 16px/1.6 "Inter Variable", Inter, system-ui, sans-serif;
+      font-variant-numeric: tabular-nums;
+    }
+    a { color: var(--violet-ink); text-underline-offset: 3px; }
+    code, pre { font-family: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13.5px; }
+    :not(pre) > code { background: var(--violet-wash); color: var(--violet-ink); padding: 1px 6px; border-radius: 6px; font-size: 0.88em; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+    @media (min-width: 720px) { .wrap { padding: 0 32px; } }
+
+    /* Top bar */
+    .top { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; gap: 16px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+    .brand-mark { width: 28px; height: 28px; border-radius: 8px; background: var(--violet); display: grid; place-items: center; }
+    .top nav { display: flex; gap: 20px; font-size: 14px; }
+    .top nav a { color: var(--ink-2); text-decoration: none; }
+    .top nav a:hover { color: var(--ink); }
+    @media (max-width: 560px) { .top nav a.opt { display: none; } }
+
+    /* Hero */
+    .hero { padding: 48px 0 40px; display: grid; gap: 40px; }
+    @media (min-width: 900px) { .hero { grid-template-columns: 1.05fr 0.95fr; align-items: center; padding: 72px 0 56px; } }
+    .eyebrow { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 600; color: var(--violet-ink);
+               background: var(--violet-wash); padding: 4px 12px; border-radius: 999px; }
+    h1 { font-size: clamp(38px, 6vw, 60px); line-height: 1.04; letter-spacing: -0.035em; margin: 18px 0 18px; text-wrap: balance; }
+    h1 em { font-style: normal; color: var(--violet); }
+    .lede { font-size: 18px; color: var(--ink-2); max-width: 34em; margin: 0 0 28px; text-wrap: pretty; }
+    .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 10px; font-weight: 600;
+           font-size: 15px; text-decoration: none; border: 1px solid var(--line-2); color: var(--ink); background: var(--surface); }
+    .btn.primary { background: var(--violet); border-color: var(--violet); color: #fff; }
+    :root[data-theme="dark"] .btn.primary { color: #16121a; }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn.primary { color: #16121a; } }
+
+    /* Prompt card */
+    .prompt { background: var(--code-bg); color: var(--code-ink); border-radius: var(--radius); padding: 20px; box-shadow: 0 24px 60px -30px rgba(60, 20, 120, 0.45); min-width: 0; }
+    .prompt .bar { display: flex; gap: 6px; margin-bottom: 16px; }
+    .prompt .bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3340; }
+    .prompt .line { display: flex; gap: 10px; font-family: "JetBrains Mono Variable", ui-monospace, monospace; font-size: 13.5px; line-height: 1.65; overflow-wrap: anywhere; }
+    .prompt .who { color: var(--code-dim); flex: none; width: 3.2em; }
+    .prompt .you { color: #f3c969; }
+    .prompt .ai { color: #b9a4f2; }
+    .prompt .ok { color: #7fd6a4; }
+    .prompt .dim { color: var(--code-dim); }
+    .prompt hr { border: 0; border-top: 1px solid #2c2532; margin: 12px 0; }
+
+    /* Sections */
+    section { padding: 56px 0; }
+    section + section { border-top: 1px solid var(--line); }
+    h2 { font-size: clamp(26px, 3.4vw, 34px); line-height: 1.15; letter-spacing: -0.025em; margin: 0 0 12px; text-wrap: balance; }
+    .sub { color: var(--ink-2); max-width: 40em; margin: 0 0 32px; font-size: 17px; }
+    h3 { font-size: 17px; margin: 0 0 6px; letter-spacing: -0.01em; }
+    .grid3 { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+    @media (min-width: 1000px) { .grid3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    .grid2 { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+    @media (min-width: 820px) { .grid2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; min-width: 0; }
+    .card p { margin: 0; color: var(--ink-2); font-size: 15px; }
+    .num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: var(--violet-wash); color: var(--violet-ink); font-weight: 700; font-size: 14px; margin-bottom: 12px; }
+    pre.code { background: var(--code-bg); color: var(--code-ink); border-radius: 10px; padding: 16px; margin: 14px 0 0; overflow-x: auto; line-height: 1.6; }
+    pre.code .c { color: var(--code-dim); }
+    pre.code .k { color: #b9a4f2; }
+    pre.code .s { color: #f3c969; }
+
+    /* Diagram */
+    .diagram { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; overflow-x: auto; }
+    .diagram svg { display: block; width: 100%; min-width: 640px; height: auto; }
+    .diagram text { font-family: "Inter Variable", Inter, system-ui, sans-serif; }
+
+    /* Access table */
+    .who-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; font-size: 15px; }
+    .who-table th, .who-table td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .who-table th { font-size: 13px; color: var(--ink-3); font-weight: 600; background: var(--sunken); }
+    .who-table tr:last-child td { border-bottom: 0; }
+    .who-table td.r { text-align: right; white-space: nowrap; font-weight: 600; }
+    .table-wrap { overflow-x: auto; }
+    .pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--violet-wash); color: var(--violet-ink); white-space: nowrap; }
+
+    /* Guarantees */
+    .rule { display: grid; grid-template-columns: 28px 1fr; gap: 12px; }
+    .tick { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in oklab, var(--green) 16%, transparent); color: var(--green); font-weight: 700; }
+    .terminal { background: var(--code-bg); color: var(--code-ink); border-radius: var(--radius); padding: 18px; font-family: "JetBrains Mono Variable", ui-monospace, monospace; font-size: 13px; line-height: 1.7; overflow-x: auto; white-space: pre; }
+    .terminal .pass { color: #7fd6a4; } .terminal .fail { color: #f28aa8; } .terminal .dim { color: var(--code-dim); }
+
+    .note { border-left: 3px solid var(--amber); background: color-mix(in oklab, var(--amber) 9%, var(--surface)); padding: 14px 18px; border-radius: 0 10px 10px 0; color: var(--ink-2); font-size: 15px; }
+    .note b { color: var(--ink); }
+    details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; }
+    details + details { margin-top: 10px; }
+    summary { cursor: pointer; font-weight: 600; }
+    details p { color: var(--ink-2); margin: 10px 0 0; font-size: 15px; }
+    footer { padding: 40px 0 56px; color: var(--ink-3); font-size: 14px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; }
+    footer a { color: var(--ink-2); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="#">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.6" stroke="#fff" stroke-width="1.6"/><path d="M3 13.5c.8-2.4 2.7-3.6 5-3.6s4.2 1.2 5 3.6" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </span>
+        anfra-user
+      </a>
+      <nav>
+        <a class="opt" href="#how">How it works</a>
+        <a class="opt" href="#safety">Safety</a>
+        <a href="#start">Get started</a>
+        <a href="https://github.com/khanh-tran-quoc/anfra-user">GitHub</a>
+      </nav>
+    </header>
+
+    <div class="hero">
+      <div>
+        <span class="eyebrow">A demo add-on for Anfra · v0.1</span>
+        <h1>Everyone sees<br><em>only their own data.</em></h1>
+        <p class="lede">anfra-user puts your Anfra repo behind sign-in. Each person sees only their own rows: their country, their vendor, their accounts.</p>
+        <div class="cta">
+          <a class="btn primary" href="#start">Give it to your agent</a>
+          <a class="btn" href="#how">See how it works</a>
+        </div>
+      </div>
+      <div class="prompt" aria-label="Example conversation with an AI agent">
+        <div class="bar" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="line"><span class="who dim">you</span><span class="you">Sales reps should log in and see only their own countries' orders.</span></div>
+        <hr>
+        <div class="line"><span class="who dim">agent</span><span class="ai">Scope sales by customers.country, from each user's country. No country: they see nothing.</span></div>
+        <div class="line"><span class="who dim"></span><span class="dim">wrote anfra-user.yml · 4 test users</span></div>
+        <div class="line"><span class="who dim">$</span><span>anfra-user verify</span></div>
+        <div class="line"><span class="who dim"></span><span class="ok">OK: 48 checks, 4 users, 12 queries.</span></div>
+        <div class="line"><span class="who dim"></span><span class="ai">Live at 127.0.0.1:8080. ana@ sees Brazil, ben@ sees USA + Canada.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <section id="how">
+      <h2>How it works</h2>
+      <p class="sub">anfra-user sits between the browser and <code>anfra serve</code>. It signs people in, works out what each one may see, and adds that filter to every query on the server, where nobody can take it off.</p>
+
+      <div class="diagram" role="img" aria-label="The browser talks to anfra-user, which signs users in against a users database and forwards scoped queries to anfra serve on loopback, which queries your database.">
+        <svg viewBox="0 0 960 236" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-3)"/>
+            </marker>
+          </defs>
+          <g fill="none" stroke="var(--ink-3)" stroke-width="1.5" marker-end="url(#arrow)">
+            <path d="M140 84 H296"/>
+            <path d="M500 84 H636"/>
+            <path d="M820 84 H846"/>
+            <path d="M400 134 V166"/>
+          </g>
+          <g font-size="12" fill="var(--ink-3)" text-anchor="middle">
+            <text x="218" y="74">sign in, ask by name</text>
+            <text x="568" y="74">AQL + your scope</text>
+            <text x="833" y="74">SQL</text>
+          </g>
+          <rect x="10" y="44" width="130" height="80" rx="12" fill="var(--sunken)" stroke="var(--line-2)"/>
+          <text x="75" y="80" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)">Browser</text>
+          <text x="75" y="101" text-anchor="middle" font-size="12" fill="var(--ink-3)">pages, Data Apps</text>
+
+          <rect x="300" y="34" width="200" height="100" rx="14" fill="var(--violet-wash)" stroke="var(--violet)" stroke-width="1.5"/>
+          <text x="400" y="72" text-anchor="middle" font-size="16" font-weight="700" fill="var(--violet-ink)">anfra-user</text>
+          <text x="400" y="94" text-anchor="middle" font-size="12" fill="var(--ink-2)">sign-in · scopes · page queries</text>
+          <text x="400" y="112" text-anchor="middle" font-size="12" fill="var(--ink-2)">check · verify · audit log</text>
+
+          <rect x="640" y="44" width="180" height="80" rx="12" fill="var(--surface)" stroke="var(--line-2)"/>
+          <text x="730" y="80" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)">anfra serve</text>
+          <text x="730" y="101" text-anchor="middle" font-size="12" fill="var(--ink-3)">127.0.0.1 only</text>
+
+          <rect x="850" y="44" width="100" height="80" rx="12" fill="var(--surface)" stroke="var(--line-2)"/>
+          <text x="900" y="80" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)">Your</text>
+          <text x="900" y="100" text-anchor="middle" font-size="15" font-weight="600" fill="var(--ink)">database</text>
+
+          <rect x="310" y="170" width="180" height="56" rx="12" fill="var(--surface)" stroke="var(--line-2)" stroke-dasharray="4 4"/>
+          <text x="400" y="196" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">Users database</text>
+          <text x="400" y="214" text-anchor="middle" font-size="12" fill="var(--ink-3)">Docker · logins, attributes</text>
+        </svg>
+      </div>
+
+      <h3 style="margin: 32px 0 12px; font-size: 20px">You set up two things</h3>
+      <div class="grid2">
+        <div class="card">
+          <span class="num">1</span>
+          <h3>Access rules</h3>
+          <p>A scope says which field limits a user's rows, and which user attribute holds their values.</p>
+<pre class="code"><span class="k">scopes</span>:
+  - <span class="k">dataset</span>: sales
+    <span class="k">field</span>: customers.country
+    <span class="k">attribute</span>: country
+    <span class="k">default_values</span>: []  <span class="c"># none: nothing</span></pre>
+        </div>
+        <div class="card">
+          <span class="num">2</span>
+          <h3>Users</h3>
+          <p>An email and password, plus the values each person may see.</p>
+<pre class="code">anfra-user users add \
+  ana@acme.com \
+  --attr country=Brazil
+
+anfra-user users add \
+  maria@acme.com \
+  --attr country=__ALL__</pre>
+        </div>
+      </div>
+      <p style="color:var(--ink-3); font-size:14px; margin:16px 0 0">Your pages and Anfra Data Apps keep working as they are: anfra-user serves them behind sign-in and adds each user's scope to their queries.</p>
+    </section>
+
+    <section id="see">
+      <h2>Same page. Different numbers.</h2>
+      <p class="sub">One sales dashboard, one scope on <code>customers.country</code>. Everyone opens the same URL.</p>
+      <div class="table-wrap">
+        <table class="who-table">
+          <thead><tr><th>Signed in as</th><th>country</th><th>Sees</th></tr></thead>
+          <tbody>
+            <tr><td>ana@acme.com</td><td><code>Brazil</code></td><td>Brazil's orders only</td></tr>
+            <tr><td>ben@acme.com</td><td><code>USA</code>, <code>Canada</code></td><td>The USA and Canada</td></tr>
+            <tr><td>maria@acme.com</td><td><code>__ALL__</code></td><td>Every country</td></tr>
+            <tr><td>new@acme.com</td><td><span class="pill">not set</span></td><td>"No country assigned to your account yet"</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="safety">
+      <h2>Built so the filter can't come off.</h2>
+      <p class="sub">The browser never chooses AQL. The gateway refuses to start on anything it can't show is safe, and tests every query as every user.</p>
+      <div class="grid2">
+        <div class="stack" style="display:grid; gap:18px">
+          <div class="rule"><span class="tick">✓</span><div><h3>Queries come from your files</h3><p style="color:var(--ink-2);margin:0">Pages are parsed on the server. The browser sends a query's name, never its text, so a tampered page runs nothing new.</p></div></div>
+          <div class="rule"><span class="tick">✓</span><div><h3>Escapes are refused</h3><p style="color:var(--ink-2);margin:0"><code>of_all</code>, <code>exclude</code>, <code>keep</code>, <code>with_relationships</code> and friends can drop a filter. <code>check</code> stops the server if any query or metric uses them.</p></div></div>
+          <div class="rule"><span class="tick">✓</span><div><h3>Empty means nothing</h3><p style="color:var(--ink-2);margin:0">No attribute, no rows. A dataset without a scope is refused unless you mark it public.</p></div></div>
+          <div class="rule"><span class="tick">✓</span><div><h3>Edits are re-checked live</h3><p style="color:var(--ink-2);margin:0">Change a page while serving: it's re-read and re-checked, and a failing query is blocked until it's fixed.</p></div></div>
+        </div>
+        <div>
+          <div class="terminal" aria-label="Sample verify output"><span class="dim">$ anfra-user verify</span>
+<span class="pass">PASS</span> ana    kpis        narrowed
+<span class="pass">PASS</span> ana    byCountry   own data only
+<span class="pass">PASS</span> new    kpis        0 rows
+<span class="pass">PASS</span> maria  kpis        __ALL__ = unscoped
+<span class="fail">FAIL</span> ana    share       total: unchanged
+                        by the scope
+<span class="dim">1 failure.</span></div>
+          <p style="color:var(--ink-3); font-size:14px; margin:12px 0 0">The leak test compares each user's results with the unscoped data and with everything outside their scope. A metric that ignores the filter shows up, whatever AQL produced it.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="start">
+      <h2>Get started</h2>
+      <p class="sub">Made for people who build with AI agents. Install the skill and describe the access you want; the agent does the rest, and checks its work.</p>
+      <div class="grid2">
+        <div class="card">
+          <h3>With Claude Code (recommended)</h3>
+          <p>Add the plugin, then ask in plain words.</p>
+<pre class="code"><span class="c"># in Claude Code</span>
+/plugin marketplace add khanh-tran-quoc/anfra-user
+/plugin install anfra-user@anfra-user
+
+<span class="c"># then just ask</span>
+<span class="s">"Put this repo behind sign-in. Each sales
+rep sees only their countries' orders."</span></pre>
+          <p style="margin-top:12px">Pairs with the <a href="https://anfra.ai">Anfra</a> skills for modeling, queries and Data Apps.</p>
+        </div>
+        <div class="card">
+          <h3>By hand</h3>
+          <p>Node 23.6+, Docker, and an Anfra repo that <code>anfra serve</code> runs.</p>
+<pre class="code">git clone https://github.com/khanh-tran-quoc/anfra-user
+cd anfra-user && npm install
+docker compose up -d        <span class="c"># users database</span>
+
+<span class="c"># in your anfra repo, with anfra serve running</span>
+node ../anfra-user/src/cli.ts check
+node ../anfra-user/src/cli.ts users add …
+node ../anfra-user/src/cli.ts verify
+node ../anfra-user/src/cli.ts serve</pre>
+          <p style="margin-top:12px">Full reference in the <a href="https://github.com/khanh-tran-quoc/anfra-user#readme">README</a>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <h2>Good to know</h2>
+      <div class="note"><b>Demo-grade sign-in.</b> Email and password, sessions in an HttpOnly cookie, bcrypt hashes. No rate limiting, lockout, password reset or MFA yet. It serves on 127.0.0.1. Great for demos and internal tools on your machine; don't put it on the internet as is.</div>
+      <div style="margin-top: 16px">
+        <details><summary>Why not Anfra's own <code>permission</code> rules?</summary><p>They aren't enforced in local Anfra yet. anfra-user enforces scopes itself, in a gateway you control. If native enforcement ships, the same idea maps onto it.</p></details>
+        <details><summary>Can my existing Data Apps use it?</summary><p>Yes, if their queries are fixed text in the file. Point <code>apps:</code> at your apps folder and they run behind sign-in, scoped, unchanged. Plugins (export, render, lineage) aren't available behind the gateway yet.</p></details>
+        <details><summary>Does anfra need to be reachable?</summary><p>Only by the gateway. <code>anfra serve</code> has no sign-in, so anyone who can reach it bypasses anfra-user. Keep it on loopback.</p></details>
+        <details><summary>Is this an official Anfra project?</summary><p>No. It's a demo built for fun, MIT licensed.</p></details>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap">
+    <footer>
+      <span>anfra-user · a demo add-on for Anfra · MIT</span>
+      <span><a href="https://github.com/khanh-tran-quoc/anfra-user">GitHub</a> · <a href="https://github.com/khanh-tran-quoc/anfra-user#readme">Docs</a> · <a href="https://github.com/khanh-tran-quoc/anfra-user/issues">Issues</a></span>
+    </footer>
+  </div>
+</body>
+</html>

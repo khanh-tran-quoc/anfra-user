@@ -1,0 +1,10 @@
+{
+  "name": "anfra-user",
+  "description": "Add email/password sign-in and per-user data scopes to an Anfra repo with the anfra-user gateway: scopes, pages written with the Anfra SDK, users, and the leak test.",
+  "version": "0.1.0",
+  "author": {
+    "name": "anfra-user contributors"
+  },
+  "license": "MIT",
+  "keywords": ["anfra", "row-level-security", "access-control", "sign-in", "data-apps", "multi-tenant"]
+}

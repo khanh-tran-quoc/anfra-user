@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5.2.5/index.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/basecoat.cdn.min.css">
+  <style>
+    :root {
+      --background: oklch(0.955 0.007 88.6); --foreground: oklch(0.201 0.022 301.1);
+      --card: oklch(1 0 0); --card-foreground: oklch(0.201 0.022 301.1);
+      --primary: oklch(0.565 0.194 300.3); --primary-foreground: oklch(1 0 0);
+      --muted-foreground: oklch(0.485 0.022 306.3);
+      --border: oklch(0.201 0.022 301.1 / 0.12); --input: oklch(0.201 0.022 301.1 / 0.22);
+      --ring: oklch(0.565 0.194 300.3); --radius: 0.625rem;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: oklch(0.17 0.015 301); --foreground: oklch(0.961 0.007 304.2);
+        --card: oklch(0.215 0.017 301); --card-foreground: oklch(0.961 0.007 304.2);
+        --primary: oklch(0.7 0.16 300); --primary-foreground: oklch(0.17 0.015 301);
+        --muted-foreground: oklch(0.72 0.02 304);
+        --border: oklch(1 0 0 / 0.1); --input: oklch(1 0 0 / 0.16); --ring: oklch(0.7 0.16 300);
+      }
+    }
+    body { font: 14px/20px "Inter Variable", Inter, system-ui, sans-serif; background: var(--background);
+           color: var(--foreground); margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px; box-sizing: border-box; }
+    .card { width: 100%; max-width: 360px; border-radius: 14px; box-shadow: none; }
+    h1 { font-size: 20px; line-height: 28px; font-weight: 600; margin: 0; }
+    .caption { font-size: 12px; line-height: 16px; color: var(--muted-foreground); }
+    .field { display: flex; flex-direction: column; gap: 8px; }
+    .field label { font-weight: 500; }
+    .input, .btn { height: 32px; font-size: 14px; }
+    .btn { width: 100%; }
+    .stack { display: flex; flex-direction: column; gap: 16px; }
+    #error { display: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <header>
+      <h1>Sign in</h1>
+      <p class="caption">anfra-user demo: email and password only. Not for production.</p>
+    </header>
+    <section class="stack">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" class="input" type="email" autocomplete="username" autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" class="input" type="password" autocomplete="current-password">
+      </div>
+      <div id="error" class="alert" data-variant="destructive"><h2 id="error-text"></h2></div>
+      <button id="submit" class="btn" type="button">Sign in</button>
+    </section>
+  </div>
+  <script>
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const submit = document.getElementById('submit');
+    const error = document.getElementById('error');
+
+    // Only same-site paths: a ?next= pointing elsewhere is ignored.
+    function nextPath () {
+      const next = new URLSearchParams(location.search).get('next') || '/';
+      return next.startsWith('/') && !next.startsWith('//') ? next : '/';
+    }
+
+    async function signIn () {
+      error.style.display = 'none';
+      submit.disabled = true;
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email: email.value, password: password.value }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Sign-in failed');
+        location.href = nextPath();
+      } catch (err) {
+        document.getElementById('error-text').textContent = err.message;
+        error.style.display = '';
+        submit.disabled = false;
+      }
+    }
+
+    submit.addEventListener('click', signIn);
+    for (const input of [email, password]) {
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') signIn(); });
+    }
+  </script>
+</body>
+</html>

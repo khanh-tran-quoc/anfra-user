@@ -1,0 +1,17 @@
+{
+  "name": "anfra-user",
+  "owner": {
+    "name": "anfra-user contributors"
+  },
+  "metadata": {
+    "description": "Sign-in and per-user data scopes for Anfra repos: users see only their own rows.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "anfra-user",
+      "description": "Add email/password sign-in and per-user data scopes to an Anfra repo with the anfra-user gateway: scopes, pages written with the Anfra SDK, users, and the leak test.",
+      "source": "./plugins/anfra-user"
+    }
+  ]
+}
